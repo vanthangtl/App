@@ -437,10 +437,12 @@ interface DeleteAccountDialogProps {
 export function DeleteAccountDialog({ account, open, onOpenChange }: DeleteAccountDialogProps) {
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
+  const [confirmName, setConfirmName] = useState("")
 
   useEffect(() => {
     if (open) {
       setError(null)
+      setConfirmName("")
     }
   }, [open])
 
@@ -474,6 +476,21 @@ export function DeleteAccountDialog({ account, open, onOpenChange }: DeleteAccou
             Bạn có chắc chắn muốn xóa tài khoản <strong>{account.name}</strong>{" "}
             không? Hành động này không thể hoàn tác.
           </p>
+
+          <div className="space-y-2">
+            <Label htmlFor="confirm-delete-name" className="text-sm font-medium">
+              Nhập tên tài khoản <span className="text-destructive font-semibold">"{account.name}"</span> để xác nhận <span className="text-destructive">*</span>
+            </Label>
+            <Input
+              id="confirm-delete-name"
+              className="h-9"
+              placeholder={account.name}
+              value={confirmName}
+              onChange={(e) => setConfirmName(e.target.value)}
+              disabled={isPending}
+              autoComplete="off"
+            />
+          </div>
         </div>
 
         {/* Thay đổi layout Footer thành cột trên mobile để nút Xóa dễ bấm hơn */}
@@ -492,7 +509,7 @@ export function DeleteAccountDialog({ account, open, onOpenChange }: DeleteAccou
             type="button"
             variant="destructive"
             onClick={handleDelete}
-            disabled={isPending}
+            disabled={isPending || confirmName !== account.name}
             className="w-full sm:w-auto" // Full width trên mobile
           >
             {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
