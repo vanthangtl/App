@@ -110,51 +110,51 @@ export function AccountCard({
 }: AccountCardProps) {
   return (
     <Card className={`w-full border shadow-sm transition-all duration-300 ${getCardStyle(type)}`}>
-      <CardHeader className="flex flex-row items-start justify-between pb-3">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-background border shadow-sm">
-            {getAccountIcon(type)}
-          </div>
-          <div className="flex flex-col">
-            <CardTitle className="text-base font-semibold truncate max-w-[120px] sm:max-w-[150px]">
-              {name}
-            </CardTitle>
-            <CardDescription className="text-xs">
-              {getAccountTypeLabel(type)}
-            </CardDescription>
-          </div>
-        </div>
-        <div className="flex items-center gap-1">
-          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground" onClick={onEdit}>
-            <SquarePen className="h-4 w-4" />
-            <span className="sr-only">Edit</span>
-          </Button>
-          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={onDelete}>
-            <Trash2 className="h-4 w-4" />
-            <span className="sr-only">Delete</span>
-          </Button>
-        </div>
-      </CardHeader>
-      <CardContent className="pb-3 text-sm">
-        <div className="space-y-1">
-          <div className="flex justify-between text-muted-foreground text-xs">
-            <span>Chủ tài khoản:</span>
-            <span className="font-medium text-foreground truncate max-w-[130px]">{owner}</span>
-          </div>
-          {accountNumber && (
-            <div className="flex justify-between text-muted-foreground text-xs">
-              <span>Số tài khoản:</span>
-              <span className="font-medium text-foreground">{accountNumber}</span>
+        <CardHeader className="flex flex-row items-start justify-between pb-3">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-background border shadow-sm">
+              {getAccountIcon(type)}
             </div>
-          )}
-        </div>
-      </CardContent>
-      <CardFooter className="pt-2 border-t border-border/40">
-        <div className="flex justify-between w-full items-center">
-          <span className="text-xs text-muted-foreground">Số dư:</span>
-          <span className="text-lg font-bold text-foreground">{formatVND(balance)}</span>
-        </div>
-      </CardFooter>
+            <div className="flex flex-col">
+              <CardTitle className="text-base font-semibold truncate max-w-[120px] sm:max-w-[150px]">
+                {name}
+              </CardTitle>
+              <CardDescription className="text-xs">
+                {getAccountTypeLabel(type)}
+              </CardDescription>
+            </div>
+          </div>
+          <div className="flex items-center gap-1">
+            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground" onClick={onEdit}>
+              <SquarePen className="h-4 w-4" />
+              <span className="sr-only">Edit</span>
+            </Button>
+            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={onDelete}>
+              <Trash2 className="h-4 w-4" />
+              <span className="sr-only">Delete</span>
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="pb-3 text-sm">
+          <div className="space-y-1">
+            <div className="flex justify-between text-muted-foreground text-xs">
+              <span>Chủ tài khoản:</span>
+              <span className="font-medium text-foreground truncate max-w-[130px]">{owner}</span>
+            </div>
+            {accountNumber && (
+              <div className="flex justify-between text-muted-foreground text-xs">
+                <span>Số tài khoản:</span>
+                <span className="font-medium text-foreground">{accountNumber}</span>
+              </div>
+            )}
+          </div>
+        </CardContent>
+        <CardFooter className="pt-2 border-t border-border/40">
+          <div className="flex justify-between w-full items-center">
+            <span className="text-xs text-muted-foreground">Số dư:</span>
+            <span className="text-lg font-bold text-foreground">{formatVND(balance)}</span>
+          </div>
+        </CardFooter>
     </Card>
   )
 }

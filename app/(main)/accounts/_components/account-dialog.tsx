@@ -110,7 +110,7 @@ export function AddAccountDialog({ open, onOpenChange }: AddAccountDialogProps) 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto rounded-xl">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>Thêm tài khoản</DialogTitle>
@@ -124,7 +124,7 @@ export function AddAccountDialog({ open, onOpenChange }: AddAccountDialogProps) 
             )}
 
             {/* Loại tài khoản */}
-            <div className="grid gap-2">
+            <div className="space-y-2">
               <Label htmlFor="type" className="text-sm font-medium">
                 Loại tài khoản
               </Label>
@@ -208,13 +208,21 @@ export function AddAccountDialog({ open, onOpenChange }: AddAccountDialogProps) 
             </div>
           </div>
 
-          <DialogFooter>
+          <DialogFooter className="flex flex-col-reverse sm:flex-row gap-2 pt-2">
             <DialogClose asChild>
-              <Button type="button" variant="outline" disabled={isPending}>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full sm:w-auto h-10" // w-auto giúp nút không bị kéo dãn trên desktop
+              >
                 Hủy
               </Button>
             </DialogClose>
-            <Button type="submit" disabled={isPending}>
+            <Button
+              type="submit"
+              className="w-full sm:w-auto h-10" // w-auto giúp nút không bị kéo dãn trên desktop
+              disabled={isPending}
+            >
               {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Thêm mới
             </Button>
@@ -222,7 +230,7 @@ export function AddAccountDialog({ open, onOpenChange }: AddAccountDialogProps) 
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
 
 interface UpdateAccountDialogProps {
@@ -300,13 +308,13 @@ export function UpdateAccountDialog({ account, open, onOpenChange }: UpdateAccou
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto rounded-xl">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>Cập nhật tài khoản</DialogTitle>
           </DialogHeader>
 
-          <div className="grid gap-4 py-4">
+          <div className="space-y-4 py-4">
             {error && (
               <div className="p-3 text-sm bg-destructive/15 text-destructive rounded-md border border-destructive/20">
                 {error}
@@ -323,7 +331,7 @@ export function UpdateAccountDialog({ account, open, onOpenChange }: UpdateAccou
                 onValueChange={(value) => handleChange("type", value)}
                 disabled={isPending}
               >
-                <SelectTrigger id="type" className="h-9">
+                <SelectTrigger id="type" className="h-10">
                   <SelectValue placeholder="Chọn loại tài khoản" />
                 </SelectTrigger>
                 <SelectContent>
@@ -395,13 +403,21 @@ export function UpdateAccountDialog({ account, open, onOpenChange }: UpdateAccou
             </div>
           </div>
 
-          <DialogFooter>
+          <DialogFooter className="flex flex-col-reverse sm:flex-row gap-2 pt-2">
             <DialogClose asChild>
-              <Button type="button" variant="outline" disabled={isPending}>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full sm:w-auto h-10" // w-auto giúp nút không bị kéo dãn trên desktop
+              >
                 Hủy
               </Button>
             </DialogClose>
-            <Button type="submit" disabled={isPending}>
+            <Button
+              type="submit"
+              className="w-full sm:w-auto h-10" // w-auto giúp nút không bị kéo dãn trên desktop
+              disabled={isPending}
+            >
               {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Lưu thay đổi
             </Button>
@@ -409,7 +425,7 @@ export function UpdateAccountDialog({ account, open, onOpenChange }: UpdateAccou
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
 
 interface DeleteAccountDialogProps {
@@ -442,25 +458,33 @@ export function DeleteAccountDialog({ account, open, onOpenChange }: DeleteAccou
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      {/* Thêm sm:max-w-md để giữ modal ở giữa trên desktop, còn mobile sẽ full-width tự động */}
+      <DialogContent className="w-[95vw] sm:max-w-md rounded-xl">
         <DialogHeader>
-          <DialogTitle>Xóa tài khoản</DialogTitle>
+          <DialogTitle className="text-lg">Xóa tài khoản</DialogTitle>
         </DialogHeader>
 
         <div className="grid gap-4 py-4">
           {error && (
-            <div className="p-3 text-sm bg-destructive/15 text-destructive rounded-md border border-destructive/20">
+            <div className="p-3 text-sm bg-destructive/15 text-destructive rounded-lg border border-destructive/20">
               {error}
             </div>
           )}
           <p className="text-sm text-muted-foreground leading-relaxed">
-            Bạn có chắc chắn muốn xóa tài khoản <strong className="text-foreground">{account.name}</strong> thuộc sở hữu của <strong className="text-foreground">{account.owner}</strong> không? Hành động này không thể hoàn tác và tất cả các giao dịch liên quan sẽ bị ảnh hưởng.
+            Bạn có chắc chắn muốn xóa tài khoản <strong>{account.name}</strong>{" "}
+            không? Hành động này không thể hoàn tác.
           </p>
         </div>
 
-        <DialogFooter>
+        {/* Thay đổi layout Footer thành cột trên mobile để nút Xóa dễ bấm hơn */}
+        <DialogFooter className="flex-col-reverse sm:flex-row gap-2">
           <DialogClose asChild>
-            <Button type="button" variant="outline" disabled={isPending}>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={isPending}
+              className="w-full sm:w-auto" // Full width trên mobile
+            >
               Hủy
             </Button>
           </DialogClose>
@@ -469,6 +493,7 @@ export function DeleteAccountDialog({ account, open, onOpenChange }: DeleteAccou
             variant="destructive"
             onClick={handleDelete}
             disabled={isPending}
+            className="w-full sm:w-auto" // Full width trên mobile
           >
             {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Xóa tài khoản
