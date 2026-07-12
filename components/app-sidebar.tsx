@@ -45,6 +45,11 @@ const sidebarData = {
     },
     {
       title: "Sổ tiết kiệm",
+      url: "/savings",
+      icon: <Gem className="h-4 w-4" />,
+    },
+    {
+      title: "Sổ tiết kiệm",
       url: "/test",
       icon: <Gem className="h-4 w-4" />,
     },

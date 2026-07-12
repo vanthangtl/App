@@ -31,20 +31,6 @@ export default async function AccountsPage() {
 
   return (
     <>
-      <div className="flex items-center gap-2">
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink href="/dashboard">Tổng quan</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>Tài khoản</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-      </div>
-
       <AccountsClient initialAccounts={accounts || []} />
     </>
   )
