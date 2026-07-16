@@ -9,6 +9,7 @@ import {
   incrementFailedAttempts,
   clearFailedAttempts,
 } from '@/lib/account-lock'
+import { parseUserAgent } from '@/lib/user-agent'
 
 const SESSION_COOKIE = 'app_session_token'
 
@@ -23,15 +24,15 @@ async function getClientIp(): Promise<string> {
 }
 
 /**
- * Tìm userId theo email qua admin API.
- * Trả về null nếu email không tồn tại.
+ * Tìm userId theo email qua admin API — dùng server-side filter thay vì
+ * listUsers() để tránh tải toàn bộ danh sách user.
  */
 async function findUserIdByEmail(email: string): Promise<string | null> {
   const admin = createAdminClient()
-  const { data, error } = await admin.auth.admin.listUsers()
-  if (error) return null
-  const user = data.users.find((u) => u.email?.toLowerCase() === email.toLowerCase().trim())
-  return user?.id ?? null
+  // listUsers với filter server-side — chỉ trả về user khớp email
+  const { data, error } = await admin.auth.admin.listUsers({ filter: `email.eq.${email.toLowerCase().trim()}` } as Parameters<typeof admin.auth.admin.listUsers>[0])
+  if (error || !data.users.length) return null
+  return data.users[0].id
 }
 
 export async function loginAction(formData: FormData) {
@@ -113,15 +114,36 @@ export async function loginAction(formData: FormData) {
 
   const admin = createAdminClient()
 
-  // Xóa session cũ (single-device enforcement)
-  await admin.from('user_sessions').delete().eq('user_id', data.user.id)
-  await admin.auth.admin.signOut(data.session!.access_token, 'others')
+  // Multi-device: KHÔNG xóa session cũ — mỗi thiết bị có session riêng
+  // Lấy metadata từ request
+  const headerStore = await headers()
+  const rawUserAgent = headerStore.get('user-agent') ?? ''
+  const { deviceName, browser, os } = parseUserAgent(rawUserAgent)
 
-  // Tạo và lưu session token mới
+  // Tạo và lưu session token mới kèm metadata thiết bị
   const sessionToken = crypto.randomUUID()
-  const { error: insertError } = await admin
+
+  // Thử insert với đầy đủ metadata trước
+  let { error: insertError } = await admin
     .from('user_sessions')
-    .insert({ user_id: data.user.id, session_token: sessionToken })
+    .insert({
+      user_id: data.user.id,
+      session_token: sessionToken,
+      device_name: deviceName,
+      browser,
+      os,
+      ip_address: ip,
+      user_agent: rawUserAgent,
+    })
+
+  // Nếu lỗi do cột chưa tồn tại (migration chưa chạy) → fallback chỉ insert các cột bắt buộc
+  if (insertError && (insertError.code === '42703' || insertError.message?.includes('column'))) {
+    console.warn('[loginAction] Metadata columns missing, falling back to base insert. Run migration: add_session_metadata.sql')
+    const fallback = await admin
+      .from('user_sessions')
+      .insert({ user_id: data.user.id, session_token: sessionToken })
+    insertError = fallback.error
+  }
 
   if (insertError) {
     console.error('[loginAction] Failed to create session:', insertError)
@@ -149,17 +171,20 @@ export async function signOutAction() {
 
   const admin = createAdminClient()
 
-  if (user) {
-    await admin.from('user_sessions').delete().eq('user_id', user.id)
-
-    if (sessionToken) {
-      await admin.auth.admin.signOut(
-        (await supabase.auth.getSession()).data.session?.access_token ?? '',
-        'global'
-      )
-    }
-  } else if (sessionToken) {
+  if (sessionToken) {
+    // Chỉ xóa session hiện tại (multi-device: giữ các session khác)
     await admin.from('user_sessions').delete().eq('session_token', sessionToken)
+  } else if (user) {
+    // Fallback: không có token → xóa toàn bộ session của user
+    await admin.from('user_sessions').delete().eq('user_id', user.id)
+  }
+
+  // Revoke Supabase session hiện tại
+  if (user) {
+    const accessToken = (await supabase.auth.getSession()).data.session?.access_token
+    if (accessToken) {
+      await admin.auth.admin.signOut(accessToken, 'local')
+    }
   }
 
   cookieStore.delete(SESSION_COOKIE)

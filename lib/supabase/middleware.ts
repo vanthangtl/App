@@ -36,7 +36,7 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser()
 
   // Các route không cần xác thực (public auth pages)
-  const publicAuthPaths = ['/login', '/unlock-account', '/reset-password']
+  const publicAuthPaths = ['/login', '/unlock-account', '/reset-password', '/forgot-password']
   const isPublicAuthPage = publicAuthPaths.some((p) =>
     request.nextUrl.pathname.startsWith(p)
   )
@@ -85,6 +85,7 @@ export async function updateSession(request: NextRequest) {
 
 /**
  * Validates the session token against the DB.
+ * Also updates last_seen_at so the activity page shows accurate timestamps.
  * Returns false if the token is invalid, revoked, or if a DB error occurs.
  */
 async function validateSessionToken(
@@ -101,16 +102,21 @@ async function validateSessionToken(
       .maybeSingle()
 
     if (error) {
-      // Log for debugging but do NOT block the user on infrastructure errors.
-      // If the table doesn't exist yet (migration not run), this will error —
-      // in that case we return true to avoid breaking the app.
       if (error.code === '42P01') {
-        // 42P01 = table does not exist
         console.warn('[middleware] user_sessions table not found. Run the SQL migration.')
         return true
       }
       console.error('[middleware] Session validation error:', error)
       return true // fail open on unexpected DB errors
+    }
+
+    if (data) {
+      // Cập nhật last_seen_at không đồng bộ — không block request
+      admin
+        .from('user_sessions')
+        .update({ last_seen_at: new Date().toISOString() })
+        .eq('id', data.id)
+        .then()
     }
 
     return data !== null

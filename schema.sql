@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS public.accounts (
     name TEXT NOT NULL,
     account_number TEXT,
     owner TEXT NOT NULL,
-    balance NUMERIC(15, 2) NOT NULL DEFAULT 0.00,
+    balance NUMERIC(15, 2) NOT NULL DEFAULT 0.00 CHECK (balance >= 0),
     type TEXT NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
@@ -48,6 +48,10 @@ CREATE TABLE IF NOT EXISTS public.categories (
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     name TEXT NOT NULL,
     type TEXT NOT NULL CHECK (type IN ('income', 'expense')),
+    "group" TEXT CHECK (
+        type = 'income'
+        OR "group" IN ('living', 'arising', 'fixed', 'investment')
+    ),
     icon TEXT,
     color TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL

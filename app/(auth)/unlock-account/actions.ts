@@ -47,7 +47,7 @@ export async function requestUnlockAction(formData: FormData) {
   try {
     const supabase = await createClient()
     const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback?next=/reset-password`,
+      redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`,
     })
 
     if (resetError) {

@@ -58,7 +58,7 @@ export function LoginForm({
               {/* Thông báo phiên bị thu hồi */}
               {sessionRevoked && (
                 <div className="text-sm text-blue-700 bg-blue-50 dark:bg-blue-950/20 dark:text-blue-300 p-3 rounded-md border border-blue-200 dark:border-blue-900/50">
-                  🔒 Phiên đăng nhập của bạn đã bị đăng xuất do có đăng nhập từ thiết bị khác. Vui lòng đăng nhập lại.
+                  🔒 Phiên đăng nhập của bạn đã hết hạn hoặc bị thu hồi. Vui lòng đăng nhập lại.
                 </div>
               )}
 
@@ -115,8 +115,15 @@ export function LoginForm({
                 />
               </Field>
               <Field className="flex flex-col gap-2">
-                <div className="flex items-center">
+                <div className="flex items-center justify-between">
                   <FieldLabel htmlFor="password">Mật khẩu</FieldLabel>
+                  <Link
+                    href="/forgot-password"
+                    className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                    tabIndex={-1}
+                  >
+                    Quên mật khẩu?
+                  </Link>
                 </div>
                 <Input
                   id="password"

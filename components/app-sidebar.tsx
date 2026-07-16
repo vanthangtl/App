@@ -11,7 +11,7 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar"
-import { Gem, Landmark, Layers, LayoutDashboard, Wallet } from "lucide-react"
+import { Gem, Landmark, Layers, LayoutDashboard, Activity, Wallet, ReceiptText, PiggyBank } from "lucide-react"
 
 // Real navigation data for the Finance App
 const sidebarData = {
@@ -39,6 +39,16 @@ const sidebarData = {
       icon: <Layers className="h-4 w-4" />,
     },
     {
+      title: "Ngân sách",
+      url: "/budget",
+      icon: <PiggyBank className="h-4 w-4" />,
+    },
+    {
+      title: "Giao dịch",
+      url: "/transactions",
+      icon: <ReceiptText className="h-4 w-4" />,
+    },
+    {
       title: "Sổ vàng",
       url: "/golds",
       icon: <Gem className="h-4 w-4" />,
@@ -49,9 +59,9 @@ const sidebarData = {
       icon: <Gem className="h-4 w-4" />,
     },
     {
-      title: "Sổ tiết kiệm",
-      url: "/test",
-      icon: <Gem className="h-4 w-4" />,
+      title: "Hoạt động",
+      url: "/activity",
+      icon: <Activity className="h-4 w-4" />,
     },
   ],
 };

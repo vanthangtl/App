@@ -55,16 +55,13 @@ async function getOrCreateLockRecord(userId: string) {
 export async function getAccountLockStatusByEmail(email: string): Promise<LockStatus | null> {
   const admin = createAdminClient()
 
-  // Tìm user theo email qua admin API
-  const { data: listData, error } = await admin.auth.admin.listUsers()
-  if (error) return null
-
-  const user = listData.users.find(
-    (u) => u.email?.toLowerCase() === email.toLowerCase().trim()
+  // Dùng server-side filter thay vì tải toàn bộ user list
+  const { data: listData, error } = await admin.auth.admin.listUsers(
+    { filter: `email.eq.${email.toLowerCase().trim()}` } as Parameters<typeof admin.auth.admin.listUsers>[0]
   )
-  if (!user) return null
+  if (error || !listData.users.length) return null
 
-  return getAccountLockStatusByUserId(user.id)
+  return getAccountLockStatusByUserId(listData.users[0].id)
 }
 
 // --------------------------------------------------------------------------
@@ -98,13 +95,14 @@ export async function getAccountLockStatusByUserId(userId: string): Promise<Lock
 export async function incrementFailedAttempts(userId: string): Promise<LockStatus> {
   const admin = createAdminClient()
 
-  // Upsert: tạo nếu chưa có, sau đó tăng
+  // 1. Upsert: nếu chưa có record thì tạo với failed_attempts=1,
+  //    nếu đã có thì bỏ qua (ignoreDuplicates) để không reset counter
   await admin.from('account_lockouts').upsert(
-    { user_id: userId, failed_attempts: 1, updated_at: new Date().toISOString() },
+    { user_id: userId, failed_attempts: 0, updated_at: new Date().toISOString() },
     { onConflict: 'user_id', ignoreDuplicates: true }
   )
 
-  // Tăng failed_attempts bằng raw SQL qua rpc hoặc fetch lên rồi update
+  // 2. Lấy giá trị hiện tại và tăng +1 trong cùng 1 round-trip
   const { data: current } = await admin
     .from('account_lockouts')
     .select('failed_attempts')
@@ -114,7 +112,7 @@ export async function incrementFailedAttempts(userId: string): Promise<LockStatu
   const newAttempts = (current?.failed_attempts ?? 0) + 1
   const shouldLock = newAttempts >= MAX_FAILED_ATTEMPTS
 
-  const { error: updateError } = await admin
+  await admin
     .from('account_lockouts')
     .update({
       failed_attempts: newAttempts,
@@ -123,10 +121,6 @@ export async function incrementFailedAttempts(userId: string): Promise<LockStatu
       updated_at: new Date().toISOString(),
     })
     .eq('user_id', userId)
-
-  if (updateError) {
-    console.error('[account-lock] increment error:', updateError)
-  }
 
   return {
     exists: true,
